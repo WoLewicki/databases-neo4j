@@ -17,4 +17,4 @@ project/plugins/project/
 .worksheet
 .idea
 
-neo4j/
+../neo4j/

@@ -43,16 +43,22 @@ class AdditionalSolutions {
     println(graphDatabase.runCypher(createShortestPathExcludingString(fromActor, toActor, excluding)))
   }
 
-  private def createShortestPathExcludingString(from: String, to: String, excluding: String): String = // TODO chuj kurwa path to jest twoja stara
-    s"MATCH (a: Actor {name: \'$from\'}), (b: Actor {name: \'$to\'}) with (a)-[:ACTS_IN*..5]-(b) as l UNWIND l as xd return filter(x in xd where reduce(s = FALSE, y in x | (y.title =~ \'$excluding\') OR s))"
+  private def createShortestPathExcludingString(from: String, to: String, excluding: String): String =
+    s"MATCH (a: Actor {name: \'$from\'}), (b: Actor {name: \'$to\'}) UNWIND nodes(shortestPath((a)-[:ACTS_IN*..3]-(b))) as l return l"
 
   private def createUserFriendsRatedString(login: String): String =
     s"Match (user:Person{login: \'$login\'}) -[:FRIEND]->(f)-[r:RATED]->(m: Movie) where r.stars > 2 return f.name, m.title, r.stars"
 
-  private def createActorDirectorString(minMoviesPlayed: Int): String = //TODO nie do konca dziala + order po wystapieniach
-    s"MATCH (a: Actor)-[:ACTS_IN]->(m: Movie), (d {name: a.name})-[:DIRECTED]->(md: Movie) " +
-      s"with a, collect(m) as movies_played, d, collect(md) as movies_directed where length(movies_played) > $minMoviesPlayed and length(movies_directed) > 0" +
-      s" return a.name, length(movies_played), length(movies_directed)"
+  private def createActorDirectorString(minMoviesPlayed: Int): String =
+    "Match (a:Actor) -[:ACTS_IN]-> (m:Movie) " +
+    "With a, count(m) as movies " +
+    s"where movies > $minMoviesPlayed " +
+    "With a,movies " +
+    "Match (a:Director) -[:DIRECTED]-> (m:Movie) " +
+    "With a,movies,count(m.title) as directed, collect(m.title) as directedTitles " +
+    "Where directed > 0 " +
+    "Return a.name,movies,directed,directedTitles " +
+    "Order By movies DESC "
 
   private def createAvgString(minMoviesPlayed: Int): String =
     s"MATCH (a: Actor)-[:ACTS_IN]->(m: Movie) with a, collect(m) as movies where length(movies) > $minMoviesPlayed return avg(length(movies)) as average"

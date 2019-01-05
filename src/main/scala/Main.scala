@@ -20,10 +20,10 @@ object Main {
 
 //    additional.findAverageAmountOfMoviesPlayedGreater(7, graphDatabase)
 
-//    additional.findActorsThatAreDirectors(5, graphDatabase)
+    additional.findActorsThatAreDirectors(5, graphDatabase)
 
 //    additional.findMoviesRatedByFriends("maheshksp", graphDatabase)
 
-    additional.findPathExcluding("Sean Connery", "Scarlett Johansson", "Jim Malone", graphDatabase)
+//    additional.findPathExcluding("Sean Connery", "Scarlett Johansson", "Jim Malone", graphDatabase)
   }
 }
