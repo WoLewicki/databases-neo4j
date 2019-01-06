@@ -43,7 +43,29 @@ class AdditionalSolutions {
     println(graphDatabase.runCypher(createShortestPathExcludingString(fromActor, toActor, excluding)))
   }
 
-  private def createShortestPathExcludingString(from: String, to: String, excluding: String): String =
+  def indexTest(actorName: String, secondActorName: String, graphDatabase: GraphDatabase): Unit = {
+    println("Without index:")
+    graphDatabase.runCypherWithDetails(createSearchingWithIndexString(actorName))
+    graphDatabase.runCypherWithDetails(createShortestPathBetweenActorsString(actorName, secondActorName))
+
+    println("With index:")
+    graphDatabase.runCypher(createIndexString())
+    graphDatabase.runCypherWithDetails(createSearchingWithIndexString(actorName))
+    graphDatabase.runCypherWithDetails(createShortestPathBetweenActorsString(actorName, secondActorName))
+
+    graphDatabase.runCypher(dropIndexString())
+  }
+
+  private def createShortestPathBetweenActorsString(actorNameFrom: String, actorNameTo: String): String =
+      s"PROFILE MATCH (a: Actor {name: \'$actorNameFrom\'}), (b: Actor {name: \'$actorNameTo\'}) return shortestPath((a)-[*]-(b)) as shortest_path"
+
+  private def createSearchingWithIndexString(actorName: String): String = s"PROFILE MATCH (a: Actor) USING INDEX a:Actor(name) where a.name = \'$actorName\' return a"
+
+  private def createIndexString(): String = "CREATE INDEX ON :Actor(name)"
+
+  private def dropIndexString(): String = "DROP INDEX ON :Actor(name)"
+
+  private def createShortestPathExcludingString(from: String, to: String, excluding: String): String = //todo
     s"MATCH (a: Actor {name: \'$from\'}), (b: Actor {name: \'$to\'}) UNWIND nodes(shortestPath((a)-[:ACTS_IN*..3]-(b))) as l return l"
 
   private def createUserFriendsRatedString(login: String): String =

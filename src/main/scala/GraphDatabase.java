@@ -37,4 +37,13 @@ public final class GraphDatabase {
         }
     }
 
+    public void runCypherWithDetails(final String cypher) {
+        try (Transaction transaction = graphDatabaseService.beginTx()) {
+            final Result result = graphDatabaseService.execute(cypher);
+            transaction.success();
+            System.out.println(result.resultAsString());
+            System.out.println(result.getExecutionPlanDescription());
+        }
+    }
+
 }
