@@ -39,8 +39,8 @@ class AdditionalSolutions {
     println(graphDatabase.runCypher(createUserFriendsRatedString(login)))
   }
 
-  def findPathExcluding(fromActor: String, toActor: String, excluding: String, graphDatabase: GraphDatabase): Unit = {
-    println(graphDatabase.runCypher(createShortestPathExcludingString(fromActor, toActor, excluding)))
+  def findPathExcluding(fromActor: String, toActor: String, graphDatabase: GraphDatabase): Unit = {
+    println(graphDatabase.runCypher(createShortestPathExcludingString(fromActor, toActor)))
   }
 
   def indexTest(actorName: String, secondActorName: String, graphDatabase: GraphDatabase): Unit = {
@@ -65,8 +65,9 @@ class AdditionalSolutions {
 
   private def dropIndexString(): String = "DROP INDEX ON :Actor(name)"
 
-  private def createShortestPathExcludingString(from: String, to: String, excluding: String): String = //todo
-    s"MATCH (a: Actor {name: \'$from\'}), (b: Actor {name: \'$to\'}) UNWIND nodes(shortestPath((a)-[:ACTS_IN*..3]-(b))) as l return l"
+  private def createShortestPathExcludingString(from: String, to: String): String =
+    s"MATCH p=shortestPath((a:Actor {name: '$from'})-[*]-(a1:Actor {name: '$to'})) " +
+      s"return extract(n in filter(x in nodes(p) where (x:Actor)) | n.name) as path"
 
   private def createUserFriendsRatedString(login: String): String =
     s"Match (user:Person{login: \'$login\'}) -[:FRIEND]->(f)-[r:RATED]->(m: Movie) where r.stars > 2 return f.name, m.title, r.stars"
